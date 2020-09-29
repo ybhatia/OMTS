@@ -1,18 +1,16 @@
 package com.cg.omts.show.service;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.cg.omts.show.exception.CustomException;
 import com.cg.omts.show.dao.ShowDao;
-import com.cg.omts.show.entity.MovieEntity;
 import com.cg.omts.show.entity.ShowEntity;
 
 @Service
@@ -20,6 +18,8 @@ public class ShowServiceImpl implements ShowService {
 
 	@Autowired
 	ShowDao showDao;
+	
+	final static Logger logger = LoggerFactory.getLogger(ShowServiceImpl.class);
 
 	@Override
 	public ShowEntity addShow(ShowEntity show) throws CustomException{
@@ -33,6 +33,7 @@ public class ShowServiceImpl implements ShowService {
 			showDao.deleteById(showId);
 			return true;
 		} else {
+			logger.error("SHOW WITH SHOW ID: " + showId + "NOT FOUND");
 			throw new CustomException("Sorry, Show Not Found");
 		}
 	}
@@ -44,6 +45,7 @@ public class ShowServiceImpl implements ShowService {
 			ShowEntity show = optional.get();
 			return show;
 		} else {
+			logger.error("SHOW WITH SHOW ID: " + showId + "NOT FOUND");
 			throw new CustomException("Sorry, Show Not Found");
 		}
 	}

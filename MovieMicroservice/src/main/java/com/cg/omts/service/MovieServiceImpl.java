@@ -1,12 +1,11 @@
 package com.cg.omts.service;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,18 +18,20 @@ public class MovieServiceImpl implements MovieService {
 
 	@Autowired
 	MovieDao movieDao;
-	// final static Logger logger = Logger.getLogger(MovieServiceImpl.class);
+	final static Logger logger = LoggerFactory.getLogger(MovieServiceImpl.class);
 
 	@Override
 	public MovieEntity addMovie(MovieEntity movie) throws CustomException {
 		String movieName = movie.getMovieName();
 		if (movieName.equals(null)) {
+			logger.error("Movie Name cannot be null");
 			throw new CustomException("Movie Name cannot be null");
 		}
 		List<MovieEntity> movieDetails = (List<MovieEntity>) movieDao.findAll();
 		for (int i = 0; i < movieDetails.size(); i++) {
 			if (movieDetails.get(i).getMovieName().equals(movieName)) {
-				throw new CustomException("Movie with this Movie Id already exist");
+				logger.error("Movie Name already exist");
+				throw new CustomException("Movie with this Movie Name already exist");
 			}
 		}
 		return movieDao.save(movie);
@@ -43,6 +44,7 @@ public class MovieServiceImpl implements MovieService {
 			movieDao.deleteById(movieId);
 			return true;
 		} else {
+			logger.error("MOVIE NOT FOUND WITH THE MOVIE ID = " + movieId);
 			throw new CustomException("Sorry, Movie Not Found");
 		}
 	}
@@ -54,6 +56,7 @@ public class MovieServiceImpl implements MovieService {
 			MovieEntity movie = optional.get();
 			return movie;
 		} else {
+			logger.error("MOVIE NOT FOUND WITH THE MOVIE ID = " + movieId);
 			throw new CustomException("Sorry, Movie Not Found");
 		}
 	}
