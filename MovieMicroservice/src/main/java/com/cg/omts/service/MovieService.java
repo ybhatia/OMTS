@@ -22,7 +22,7 @@ public interface MovieService {
 
 	List<MovieEntity> getMovieByReleaseDate(LocalDate movieReleaseDate);
 
-	MovieEntity updateMovie(MovieEntity show) throws CustomException;
+	MovieEntity updateMovie(MovieEntity movie) ;
 
 	List<MovieEntity> getAllMovie();
 

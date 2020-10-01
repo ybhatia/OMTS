@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.cg.omts.dto.MovieDto;
 import com.cg.omts.entity.MovieEntity;
 import com.cg.omts.exception.CustomException;
 import com.cg.omts.service.MovieService;
@@ -39,69 +40,65 @@ public class MovieController {
 	RestTemplate restTemplate;
 
 	@PostMapping("/addmovie")
-	public ResponseEntity<MovieEntity> addNewMovie(@RequestBody MovieEntity movieDto) {
-		MovieEntity movie = new MovieEntity();
-		movie.setMovieName(movieDto.getMovieName());
-		movie.setMovieGenre(movieDto.getMovieGenre());
-		movie.setMovieLanguage(movieDto.getMovieLanguage());
-		movie.setMovieReleaseDate(movieDto.getMovieReleaseDate());
-		movieService.addMovie(movie);
-		ResponseEntity<MovieEntity> response = new ResponseEntity<>(movieDto, HttpStatus.OK);
-		logger.info("A NEW MOVIE ADDED WITH THE MOVIE NAME = " + movieDto.getMovieName());
-		return response;
+	public ResponseEntity<MovieDto> addNewMovie(@RequestBody MovieDto movie) {
+		MovieEntity movieEntity = convertToMovieEntity(movie);
+		movieEntity.setMovieName(movie.getMovieName());
+		movieEntity.setMovieGenre(movie.getMovieGenre());
+		movieEntity.setMovieLanguage(movie.getMovieLanguage());
+		movieEntity.setMovieReleaseDate(movie.getMovieReleaseDate());
+		movieService.addMovie(movieEntity);
+		MovieDto movieDto = convertToMovieDto(movieEntity);
+		logger.info("A NEW MOVIE ADDED SUCCESSFULY");
+		return new ResponseEntity<>(movieDto, HttpStatus.OK);
+
 	}
 
 	@GetMapping("/allmovies")
 	public ResponseEntity<List<MovieEntity>> getAllMovies() {
 		List<MovieEntity> movie = movieService.getAllMovie();
-		ResponseEntity<List<MovieEntity>> response = new ResponseEntity<>(movie, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(movie, HttpStatus.OK);
 	}
 
 	@GetMapping("/moviebyid/{movieId}")
 	public ResponseEntity<MovieEntity> getMovieById(@PathVariable Integer movieId) {
 		MovieEntity bus = movieService.getMovieById(movieId);
-		ResponseEntity<MovieEntity> response = new ResponseEntity<>(bus, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(bus, HttpStatus.OK);
 	}
 
 	@GetMapping("/moviebyname/{movieName}")
 	public ResponseEntity<MovieEntity> getMovieByName(@PathVariable String movieName) {
 		MovieEntity movie = movieService.getMovieByName(movieName);
-		ResponseEntity<MovieEntity> response = new ResponseEntity<>(movie, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(movie, HttpStatus.OK);
 	}
 
 	@GetMapping("/moviebygenre/{movieGenre}")
 	public ResponseEntity<List<MovieEntity>> getMovieByGenre(@PathVariable String movieGenre) {
 		List<MovieEntity> movie = movieService.getMovieByGenre(movieGenre);
-		ResponseEntity<List<MovieEntity>> response = new ResponseEntity<>(movie, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(movie, HttpStatus.OK);
 	}
 
 	@GetMapping("/moviebylanguage/{movieLanguage}")
 	public ResponseEntity<List<MovieEntity>> getMovieByLanguage(@PathVariable String movieLanguage) {
 		List<MovieEntity> movie = movieService.getMovieByLanguage(movieLanguage);
-		ResponseEntity<List<MovieEntity>> response = new ResponseEntity<>(movie, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(movie, HttpStatus.OK);
 	}
 
 	@PutMapping("/update")
-	public ResponseEntity<MovieEntity> updateMovie(@RequestBody MovieEntity movie) {
-		MovieEntity movieEntity = movieService.updateMovie(movie);
-		ResponseEntity<MovieEntity> response = new ResponseEntity<>(movie, HttpStatus.OK);
-		logger.info("MOVIE WITH THE MOVIE NAME = " + movieEntity.getMovieId() + " UPDATED.");
-		return response;
-
+	public ResponseEntity<MovieDto> updateMovie(@RequestBody MovieDto movie) {
+		MovieEntity movieEntity = convertToMovieEntity(movie);
+		movieEntity = movieService.updateMovie(movieEntity);
+		MovieDto movieDto = convertToMovieDto(movieEntity);
+		logger.info("MOVIE IS UPDATED SUCCESSFULLY");
+		return new ResponseEntity<>(movieDto, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/delete/{movieId}")
 	public boolean deleteMovie(@PathVariable Integer movieId) {
 		boolean flag = movieService.deleteMovie(movieId);
-		logger.info("MOVIE REMOVED WITH THE BUS ID = " + movieId);
+		logger.info("MOVIE IS REMOVED SUCCESSFULLY");
 		return flag;
 	}
-	
+
 	/*
 	 * Handle Movie not found Exception
 	 * 
@@ -111,10 +108,9 @@ public class MovieController {
 	public ResponseEntity<String> handleBookingNotFound(CustomException ex) {
 		logger.error("MOVIE NOT FOUND!!!", ex);
 		String msg = ex.getMessage();
-		ResponseEntity<String> response = new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);
-		return response;
+		return new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);
 	}
-	
+
 	/*
 	 * Blanket Exception Handler
 	 * 
@@ -124,9 +120,26 @@ public class MovieController {
 	public ResponseEntity<String> handleAll(Throwable ex) {
 		logger.error("Something went wrong", ex);
 		String msg = ex.getMessage();
-		ResponseEntity<String> response = new ResponseEntity<>(msg, HttpStatus.INTERNAL_SERVER_ERROR);
-		return response;
+		return new ResponseEntity<>(msg, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	public MovieEntity convertToMovieEntity(MovieDto movieDto) {
+		MovieEntity movieEntity = new MovieEntity();
+		movieEntity.setMovieId(movieDto.getMovieId());
+		movieEntity.setMovieName(movieDto.getMovieName());
+		movieEntity.setMovieGenre(movieDto.getMovieGenre());
+		movieEntity.setMovieLanguage(movieDto.getMovieLanguage());
+		movieEntity.setMovieReleaseDate(movieDto.getMovieReleaseDate());
+		return movieEntity;
+	}
 
+	public MovieDto convertToMovieDto(MovieEntity movieEntity) {
+		MovieDto movieDto = new MovieDto();
+		movieDto.setMovieId(movieEntity.getMovieId());
+		movieDto.setMovieName(movieEntity.getMovieName());
+		movieDto.setMovieGenre(movieEntity.getMovieGenre());
+		movieDto.setMovieLanguage(movieEntity.getMovieLanguage());
+		movieDto.setMovieReleaseDate(movieEntity.getMovieReleaseDate());
+		return movieDto;
+	}
 }

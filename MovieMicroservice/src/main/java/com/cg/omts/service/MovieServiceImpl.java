@@ -23,7 +23,7 @@ public class MovieServiceImpl implements MovieService {
 	@Override
 	public MovieEntity addMovie(MovieEntity movie) throws CustomException {
 		String movieName = movie.getMovieName();
-		if (movieName.equals(null)) {
+		if (movieName == null) {
 			logger.error("Movie Name cannot be null");
 			throw new CustomException("Movie Name cannot be null");
 		}
@@ -31,7 +31,7 @@ public class MovieServiceImpl implements MovieService {
 		for (int i = 0; i < movieDetails.size(); i++) {
 			if (movieDetails.get(i).getMovieName().equals(movieName)) {
 				logger.error("Movie Name already exist");
-				throw new CustomException("Movie with this Movie Name already exist");
+				throw new CustomException(String.format("Movie with Movie Name: %s already exist", movieName));
 			}
 		}
 		return movieDao.save(movie);
@@ -44,8 +44,8 @@ public class MovieServiceImpl implements MovieService {
 			movieDao.deleteById(movieId);
 			return true;
 		} else {
-			logger.error("MOVIE NOT FOUND WITH THE MOVIE ID = " + movieId);
-			throw new CustomException("Sorry, Movie Not Found");
+			logger.error("MOVIE NOT FOUND ");
+			throw new CustomException(String.format("Sorry, Movie with Movie Id : %d Not Found", movieId));
 		}
 	}
 
@@ -56,28 +56,28 @@ public class MovieServiceImpl implements MovieService {
 			MovieEntity movie = optional.get();
 			return movie;
 		} else {
-			logger.error("MOVIE NOT FOUND WITH THE MOVIE ID = " + movieId);
-			throw new CustomException("Sorry, Movie Not Found");
+			logger.error("MOVIE NOT FOUND");
+			throw new CustomException(String.format("Sorry, Movie with Movie Id : %d Not Found", movieId));
 		}
 	}
 
 	@Override
-	public MovieEntity getMovieByName(String name){
+	public MovieEntity getMovieByName(String name) {
 		return movieDao.searchMovieByName(name);
 	}
 
 	@Override
-	public List<MovieEntity> getMovieByLanguage(String language){
+	public List<MovieEntity> getMovieByLanguage(String language) {
 		return movieDao.searchMovieByLanguage(language);
 	}
 
 	@Override
-	public List<MovieEntity> getMovieByGenre(String genre){
+	public List<MovieEntity> getMovieByGenre(String genre) {
 		return movieDao.searchMovieByGenre(genre);
 	}
 
 	@Override
-	public List<MovieEntity> getMovieByReleaseDate(LocalDate releaseDate){
+	public List<MovieEntity> getMovieByReleaseDate(LocalDate releaseDate) {
 		return movieDao.searchMovieByReleaseDate(releaseDate);
 	}
 
@@ -90,7 +90,7 @@ public class MovieServiceImpl implements MovieService {
 	}
 
 	@Override
-	public List<MovieEntity> getAllMovie(){
+	public List<MovieEntity> getAllMovie() {
 		return movieDao.findAll();
 	}
 

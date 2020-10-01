@@ -3,10 +3,7 @@ package com.cg.omts.show.entity;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -14,16 +11,10 @@ import javax.persistence.Table;
 @Table(name = "movie")
 public class MovieEntity {		
 		@Id
-//		@GeneratedValue(strategy = GenerationType.IDENTITY)
-//		@Column(columnDefinition = "serial", name = "movie_id")
 		private Integer movieId;
-		//@Column(name = "movie_name")
 		private String movieName;
-		//@Column(name = "movie_genre")
 		private String movieGenre;
-		//@Column(name = "movie_language")
 		private String movieLanguage;
-		//@Column(name = "movie_releaseDate")
 		private LocalDate movieReleaseDate;
 		
 		public MovieEntity() {

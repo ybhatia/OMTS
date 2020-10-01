@@ -33,7 +33,7 @@ public class ShowServiceImpl implements ShowService {
 			showDao.deleteById(showId);
 			return true;
 		} else {
-			logger.error("SHOW WITH SHOW ID: " + showId + "NOT FOUND");
+			logger.error("SHOW NOT FOUND");
 			throw new CustomException("Sorry, Show Not Found");
 		}
 	}
@@ -45,7 +45,7 @@ public class ShowServiceImpl implements ShowService {
 			ShowEntity show = optional.get();
 			return show;
 		} else {
-			logger.error("SHOW WITH SHOW ID: " + showId + "NOT FOUND");
+			logger.error("SHOW NOT FOUND");
 			throw new CustomException("Sorry, Show Not Found");
 		}
 	}
@@ -61,8 +61,13 @@ public class ShowServiceImpl implements ShowService {
 	}
 
 	@Override
-	public List<ShowEntity> getShowByMovieId(Integer movieId) {
-		return showDao.searchShowByMovieId(movieId);
+	public List<ShowEntity> getShowByMovieId(Integer movieId) throws CustomException {
+		List<ShowEntity> showList = showDao.searchShowByMovieId(movieId);
+		if (showList.isEmpty()) {
+			logger.error("SHOW NOT FOUND");
+			throw new CustomException("Sorry!!! No Show under this MovieId");
+		}
+		return showList;
 	}
 
 	@Override

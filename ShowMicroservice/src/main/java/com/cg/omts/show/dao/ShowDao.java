@@ -1,8 +1,6 @@
 package com.cg.omts.show.dao;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;

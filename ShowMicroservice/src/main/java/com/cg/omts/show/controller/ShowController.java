@@ -24,7 +24,6 @@ import com.cg.omts.show.entity.ShowEntity;
 import com.cg.omts.show.exception.CustomException;
 import com.cg.omts.show.service.ShowService;
 
-
 /* @RestController tells Spring that this is the Handler class and contains handler methods. Basically does combined job of @Controller and @ResponseBody
  * @RequestMapping annotation is used to map the web requests to specified
  * handler classes or methods
@@ -45,68 +44,75 @@ public class ShowController {
 	public ResponseEntity<MovieEntity> getMovieById(@PathVariable Integer movieId) {
 		String url = "http://localhost:1111/movie/moviebyid/" + movieId;
 		MovieEntity movie = restTemplate.getForObject(url, MovieEntity.class);
-		ResponseEntity<MovieEntity> response = new ResponseEntity<>(movie, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(movie, HttpStatus.OK);
 	}
-	
-//	@GetMapping("/moviebyname/{movieName}")
-//	public ResponseEntity<MovieEntity> getMovieById(@PathVariable String movieName) {
-//		String url = "http://movie-info-service/movie/moviebyname/" + movieName;
-//		MovieEntity movie = restTemplate.getForObject(url, MovieEntity.class);
-//		ResponseEntity<MovieEntity> response = new ResponseEntity<>(movie, HttpStatus.OK);
-//		return response;
-//	}
 
 	@PostMapping("/addshow")
-	public ResponseEntity<ShowEntity> addNewShow(@RequestBody ShowEntity showDto) {
+	public ResponseEntity<ShowDto> addNewShow(@RequestBody ShowDto showDto) {
 		ShowEntity show = new ShowEntity();
 		show.setShowStartTime(showDto.getShowStartTime());
 		show.setShowEndTime(showDto.getShowEndTime());
 		show.setMovieId(showDto.getMovieId());
 		show.setNoOfSeats(showDto.getNoOfSeats());
 		showService.addShow(show);
-		ResponseEntity<ShowEntity> response = new ResponseEntity<>(showDto, HttpStatus.OK);
-		logger.info("A NEW SHOW ADDED FOR THE MOVIE ID = " + showDto.getMovieId());
+		logger.info("A NEW SHOW ADDED SUCCESSFULLY");
+		return new ResponseEntity<>(showDto, HttpStatus.OK);
+	}
+
+	@GetMapping("/bookseats/{showId}/{numberOfSeats}")
+	public ResponseEntity<ShowEntity> bookSeats(@PathVariable Integer showId, @PathVariable Integer numberOfSeats) {
+		ShowEntity show = showService.getShowById(showId);
+		Integer availableNumberOfSeats = show.getNoOfSeats() - numberOfSeats;
+		show.setNoOfSeats(availableNumberOfSeats);
+		ShowEntity updatedShow = showService.updateShow(show);
+		ResponseEntity<ShowEntity> response = new ResponseEntity<>(updatedShow, HttpStatus.OK);
+		return response;
+	}
+	
+	@GetMapping("/cancelseats/{showId}/{numberOfSeats}")
+	public ResponseEntity<ShowEntity> cancelSeats(@PathVariable Integer showId, @PathVariable Integer numberOfSeats) {
+		ShowEntity show = showService.getShowById(showId);
+		Integer availableNumberOfSeats = show.getNoOfSeats() + numberOfSeats;
+		show.setNoOfSeats(availableNumberOfSeats);
+		ShowEntity updatedShow = showService.updateShow(show);
+		ResponseEntity<ShowEntity> response = new ResponseEntity<>(updatedShow, HttpStatus.OK);
 		return response;
 	}
 
 	@GetMapping("/allshows")
 	public ResponseEntity<List<ShowEntity>> getAllShow() {
 		List<ShowEntity> show = showService.getAllShow();
-		ResponseEntity<List<ShowEntity>> response = new ResponseEntity<>(show, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(show, HttpStatus.OK);
+
 	}
 
 	@GetMapping("/showbyid/{showId}")
 	public ResponseEntity<ShowEntity> getShowById(@PathVariable Integer showId) {
 		ShowEntity show = showService.getShowById(showId);
-		ResponseEntity<ShowEntity> response = new ResponseEntity<>(show, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(show, HttpStatus.OK);
 	}
 
 	@GetMapping("/showbymovieid/{movieId}")
 	public ResponseEntity<List<ShowEntity>> getShowByMovieId(@PathVariable Integer movieId) {
 		List<ShowEntity> show = showService.getShowByMovieId(movieId);
-		ResponseEntity<List<ShowEntity>> response = new ResponseEntity<>(show, HttpStatus.OK);
-		return response;
+		return new ResponseEntity<>(show, HttpStatus.OK);
 	}
 
 	@PutMapping("/update")
 	public ResponseEntity<ShowEntity> updateShow(@RequestBody ShowEntity showDto) {
 		ShowEntity show = showService.updateShow(showDto);
-		ResponseEntity<ShowEntity> response = new ResponseEntity<>(show, HttpStatus.OK);
-		logger.info("SHOW WITH THE SHOW ID = " + show.getShowId() + " UPDATED.");
-		return response;
+		logger.info("SHOW UPDATED SUCCESSFULLY");
+		return new ResponseEntity<>(show, HttpStatus.OK);
 
 	}
 
 	@DeleteMapping("/delete/{showId}")
 	public boolean deleteShow(@PathVariable Integer showId) {
 		boolean flag = showService.deleteShow(showId);
-		logger.info("SHOW REMOVED WITH THE SHOW ID = " + showId);
+		logger.info("SHOW REMOVED SUCCESSFULLY");
 		return flag;
 	}
-	
+
 	/*
 	 * Handle Movie not found Exception
 	 * 
@@ -116,10 +122,9 @@ public class ShowController {
 	public ResponseEntity<String> handleBookingNotFound(CustomException ex) {
 		logger.error("SHOW NOT FOUND!!!", ex);
 		String msg = ex.getMessage();
-		ResponseEntity<String> response = new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);
-		return response;
+		return new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);
 	}
-	
+
 	/*
 	 * Blanket Exception Handler
 	 * 
@@ -129,9 +134,27 @@ public class ShowController {
 	public ResponseEntity<String> handleAll(Throwable ex) {
 		logger.error("Something went wrong", ex);
 		String msg = ex.getMessage();
-		ResponseEntity<String> response = new ResponseEntity<>(msg, HttpStatus.INTERNAL_SERVER_ERROR);
-		return response;
+		return new ResponseEntity<>(msg, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
+	public ShowEntity convertToMovieEntity(ShowDto showDto) {
+		ShowEntity showEntity = new ShowEntity();
+		showEntity.setShowId(showDto.getShowId());
+		showEntity.setShowStartTime(showDto.getShowStartTime());
+		showEntity.setShowEndTime(showDto.getShowEndTime());
+		showEntity.setMovieId(showDto.getMovieId());
+		showEntity.setNoOfSeats(showDto.getNoOfSeats());
+		return showEntity;
+	}
+
+	public ShowDto convertToMovieDto(ShowEntity showEntity) {
+		ShowDto showDto = new ShowDto();
+		showDto.setShowId(showDto.getShowId());
+		showDto.setShowStartTime(showDto.getShowStartTime());
+		showDto.setShowEndTime(showDto.getShowEndTime());
+		showDto.setMovieId(showDto.getMovieId());
+		showDto.setNoOfSeats(showDto.getNoOfSeats());
+		return showDto;
+	}
 
 }
